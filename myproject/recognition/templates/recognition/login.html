@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio de Sesión Biométrico</title>
+    <link rel="stylesheet" href="{% static 'myapp/css/styles.css' %}">
+</head>
+<body>
+    <h1>Inicio de Sesión Biométrico</h1>
+    <video id="video" width="1280" height="720" autoplay></video>
+    <button id="capture">Capturar</button>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('capture');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            });
+
+        captureButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1280;
+            canvas.height = 720;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('video', blob, 'frame.jpg');
+
+                fetch('{% url "process_video" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.result === 'success') {
+                        alert(`Usuario reconocido: ${data.username}`);
+                    } else {
+                        alert('Error al procesar el video');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al procesar el video: ', error);
+                });
+            }, 'image/jpeg');
+        });
+    </script>
+</body>
+</html>
