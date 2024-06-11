@@ -122,7 +122,7 @@ STATIC_URL = 'static/'
 # Ruta adicional de archivos estáticos
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),]
+    os.path.join(BASE_DIR, "recognition/static"),]
 
 # Directorio de archivos estáticos generados
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
